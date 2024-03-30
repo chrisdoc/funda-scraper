@@ -12,6 +12,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -31,3 +36,6 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
           SEARCH_URL: ${{ secrets.SEARCH_URL }}
         run: python scraper.py
+
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
