@@ -1,8 +1,8 @@
 name: Funda Scraper
 
 on:
-  schedule:
-    - cron: "*/30 * * * *"
+  # schedule:
+  #   - cron: "*/30 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -22,4 +22,9 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run Funda Scraper
-        run: python scraper.py
+        env:
+          FUNDA_DB: ${{ secrets.FUNDA_DB }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          SEARCH_URL: ${{ secrets.SEARCH_URL }}
+        run: python funda_scraper.py
