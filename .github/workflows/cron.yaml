@@ -35,6 +35,7 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           SEARCH_URL: ${{ secrets.SEARCH_URL }}
+          OPENAI_API_KEY : ${{ secrets.OPENAI_API_KEY }}
         run: python scraper.py
 
       - name: Commit and push changes

@@ -2,29 +2,39 @@ import sqlite3
 from typing import List
 from bs4 import BeautifulSoup, Tag
 import requests
+import re
+from fake_useragent import UserAgent
 
 
 class Listing:
     def __init__(
-        self, street: str, link: str, price: str, hasElevator: bool, stories: str
+        self,
+        street: str,
+        link: str,
+        price: str,
+        hasElevator: bool,
+        stories: str,
+        summary: str,
     ):
         self.street = street.strip()
         self.link = link.strip()
         self.hasElevator = hasElevator
         self.price = price.strip()
         self.stories = stories.strip()
+        self.summary = summary.strip()
 
     def __str__(self) -> str:
         return self.street + " : " + str(self.hasElevator) + " : " + self.price
 
 
 class Funda:
-    user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:122.0) Gecko/20100101 Firefox/122.0"
+    user_agent = UserAgent().chrome
 
-    def __init__(self, db_location, search_url) -> None:
+    def __init__(self, db_location, openai_client, search_url) -> None:
         print("funda: init client")
         sqlite_connection = sqlite3.connect(db_location)
         self.cursor = sqlite_connection.cursor()
+        self.openai_client = openai_client
         self.search_url = search_url
 
     def fetchNew(self) -> List[Listing]:
@@ -64,6 +74,7 @@ class Funda:
                     price=self.fetchPrice(newListing),
                     hasElevator=self.hasElevator(apartmentPage),
                     stories=self.fetchNumberOfStories(apartment_page_parsed),
+                    summary=self.fetchSummary(apartment_page_parsed),
                 )
                 result.append(listing)
             else:
@@ -90,3 +101,27 @@ class Funda:
 
     def fetchPrice(self, listing) -> str:
         return listing.select("p[data-test-id=price-sale]")[0].text
+
+    def fetchSummary(self, apartmentPage) -> str:
+        headless = apartmentPage.find_all(
+            "div", {"id": re.compile("headlessui-disclosure-panel.*")}
+        )
+        content = "\n".join(list(map(lambda x: x.get_text(), headless)))
+
+        prompt = f"""
+        You are given the information about a dutch house listing and your task is to generate a summary of the listing.
+
+        Please format the output in Markdownv2 so that it can be used to send a message from a telegram bot to a house hunter. Make sure that there is a tl;dr execute summary at the beginning with the most important information like size, number of bedrooms, highlights and location! Only include the most important information and discard everything else. The message should be maximum 100 words long with the most important information at the beginning.
+
+        Do not wrap the text in a markdown code block, just use the markdown syntax for formatting.
+
+        Content:
+        \"\"\"
+        {content}
+        \"\"\"
+        """
+
+        completion = self.openai_client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}], model="gpt-4o"
+        )
+        return completion.choices[0].message.content
