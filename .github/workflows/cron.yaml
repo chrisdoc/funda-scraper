@@ -19,10 +19,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.x
 
@@ -35,6 +35,7 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           SEARCH_URL: ${{ secrets.SEARCH_URL }}
+          OPENAI_API_KEY : ${{ secrets.OPENAI_API_KEY }}
         run: python scraper.py
 
       - name: Commit and push changes

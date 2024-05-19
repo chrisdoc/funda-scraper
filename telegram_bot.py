@@ -11,6 +11,10 @@ class TelegramBot:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(
             self.bot.send_message(
-                chat_id=self.chat_id, text=content, parse_mode="MarkdownV2", read_timeout=30, write_timeout=30
+                chat_id=self.chat_id,
+                text=content,
+                parse_mode="MarkdownV2",
+                read_timeout=30,
+                write_timeout=30,
             )
         )
