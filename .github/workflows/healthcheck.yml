@@ -1,0 +1,16 @@
+name: Ping Healthchecks.io
+on:
+  workflow_run:
+    workflows: ['Funda Scraper']
+    types: [completed]
+jobs:
+  Ping-Success:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - run: curl -m 10 --retry 5 ${{ secrets.HEALTHCHECKS_URL }}
+  Ping-Failure:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - run: curl -m 10 --retry 5 ${{ secrets.HEALTHCHECKS_URL }}/fail
