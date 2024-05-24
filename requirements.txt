@@ -1,6 +1,6 @@
 beautifulsoup4==4.12.3
 python-telegram-bot==21.2
-Requests==2.31.0
+Requests==2.32.2
 ruff==0.4.4
 fake-useragent==1.5.1
 openai==1.30.1
